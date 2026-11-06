@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QueueEase — Smart Token Management</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+:root{
+  --navy:#101b3c;--navy2:#1b2b58;--navy3:#263d73;
+  --pink:#f38bb9;--pink2:#ffd5e6;--pinkpale:#fff2f7;
+  --bg:#f6f7fb;--white:#fff;--text:#24304f;--muted:#8790a8;
+  --line:#e9eaf1;--green:#219b7a;--amber:#d89a36;--red:#d85c7d;
+  --shadow:0 16px 40px rgba(16,27,60,.07);
+}
+*{box-sizing:border-box}
+html {
+    scroll-behavior: smooth;
+}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:grid;grid-template-columns:252px minmax(0,1fr)}
+.sidebar{background:linear-gradient(165deg,#101b3c 0%,#172650 70%,#203361 100%);padding:26px 18px;color:#fff;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+.brand{display:flex;align-items:center;gap:12px;padding:0 9px 36px}
+.logo{height:43px;width:43px;border-radius:15px;background:linear-gradient(135deg,#ffb7d3,var(--pink));display:grid;place-items:center;color:var(--navy);font-size:25px;font-weight:800;box-shadow:0 7px 20px #f38bb944}
+.brand-name{font:800 19px Manrope,sans-serif;letter-spacing:-.6px}
+.brand-sub{font-size:9px;letter-spacing:1.7px;color:#aab6d5;margin-top:3px}
+.nav-label{font-size:9px;font-weight:700;letter-spacing:1.7px;color:#7f8db5;padding:0 12px 12px}
+.nav{display:grid;gap:6px}
+.nav-item{display:flex;align-items:center;gap:13px;color:#b9c3dc;padding:13px 14px;border-radius:12px;font-size:12px;font-weight:600;transition:.2s}
+.nav-item .ico{font-size:17px;width:20px;text-align:center}
+.nav-item.active{background:linear-gradient(90deg,#f38bb92c,#f38bb911);color:#fff;box-shadow:inset 3px 0 var(--pink)}
+.nav-item:not(.active):hover{background:#ffffff0d;color:#fff}
+.side-bottom{margin-top:auto}
+.priority-card{padding:16px;border:1px solid #ffffff1b;background:#ffffff0b;border-radius:16px}
+.priority-top{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;margin-bottom:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#6ee0b8;box-shadow:0 0 0 4px #6ee0b822}
+.priority-card p{font-size:10px;line-height:1.65;color:#aebbd8;margin:0}
+.side-footer{font-size:9px;color:#7483a9;padding:18px 5px 0}
+main{width:100%;max-width:1600px;margin:auto;padding:30px 36px 38px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:23px;gap:14px}
+.crumb{font-size:10px;color:#a06b87;font-weight:700;letter-spacing:1.7px;text-transform:uppercase}
+h1{font:800 27px Manrope,sans-serif;color:var(--navy);letter-spacing:-.8px;margin:5px 0 0}
+.top-right{display:flex;align-items:center;gap:10px}
+.date-chip,.user-chip{background:#fff;border:1px solid var(--line);padding:10px 13px;border-radius:12px;font-size:11px;color:#68718b}
+.user-chip{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--navy)}
+.avatar{height:28px;width:28px;border-radius:9px;background:var(--pinkpale);color:#b44c7a;display:grid;place-items:center;font-size:12px}
+.hero{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 28px;border-radius:20px;background:linear-gradient(112deg,#101b3c 0%,#1b2d5c 62%,#2a427a 100%);color:#fff;box-shadow:0 14px 32px #15244b20;margin-bottom:20px}
+.hero:before,.hero:after{content:"";position:absolute;border:1px solid #ffffff12;border-radius:50%;pointer-events:none}
+.hero:before{height:260px;width:260px;right:90px;top:-150px}
+.hero:after{height:340px;width:340px;right:-80px;top:-160px}
+.hero-copy{position:relative;z-index:1}
+.hero-kicker{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:#f6b5d0;font-weight:700;margin-bottom:9px}
+.hero h2{font:800 21px Manrope,sans-serif;margin:0 0 7px;letter-spacing:-.4px}
+.hero p{font-size:11px;color:#c5cde1;margin:0;line-height:1.6}
+.hero-status{position:relative;z-index:1;background:#ffffff12;border:1px solid #ffffff20;border-radius:13px;padding:12px 15px;min-width:145px}
+.hero-status small{display:block;color:#bfc9e0;font-size:9px;margin-bottom:6px}
+.hero-status strong{font-size:12px;display:flex;align-items:center;gap:7px}
+.hero-status i{height:7px;width:7px;background:#69dfb4;border-radius:50%;display:inline-block;box-shadow:0 0 0 4px #69dfb422}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:19px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 17px;box-shadow:0 5px 18px #15244b06}
+.stat-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:10px;font-weight:600}
+.stat-icon{height:34px;width:34px;border-radius:11px;display:grid;place-items:center;font-size:15px}
+.ic-pink{background:#fff0f6;color:#c25a89}.ic-blue{background:#eef2ff;color:#5267ad}.ic-green{background:#e9f8f2;color:#249a78}.ic-gold{background:#fff6e8;color:#c38a2e}
+.stat-value{font:800 25px Manrope,sans-serif;color:var(--navy);margin-top:10px;letter-spacing:-.7px}
+.stat-foot{font-size:9px;color:#a1a8b8;margin-top:4px}
+.content-grid{display:grid;grid-template-columns:minmax(290px,.87fr) minmax(430px,1.45fr);gap:18px;align-items:start}
+.card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:19px;box-shadow:0 5px 18px #15244b06;margin-bottom:17px;min-width:0}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.card-title{font:800 13px Manrope,sans-serif;color:var(--navy)}
+.card-sub{font-size:9px;color:#9aa1b2;margin-top:5px}
+.card-symbol{height:30px;width:30px;border-radius:10px;background:var(--pinkpale);display:grid;place-items:center;color:#b94e7d;font-size:14px}
+.form-row{margin-bottom:13px}
+label.field-label{display:block;font-size:9px;letter-spacing:.7px;font-weight:800;color:#68718b;margin-bottom:7px}
+input,select{width:100%;padding:11px 12px;border:1px solid #e5e7ef;border-radius:10px;background:#fcfcfe;color:var(--text);outline:none;font-size:11px;transition:.2s}
+input:focus,select:focus{border-color:var(--pink);box-shadow:0 0 0 3px #f38bb91c}
+input::placeholder{color:#b1b6c4}
+.type-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.type-option{display:flex;align-items:center;gap:8px;padding:11px;border:1px solid #e7e8ef;border-radius:10px;font-size:10px;font-weight:700;color:#707990;cursor:pointer;transition:.2s}
+.type-option input{width:auto;margin:0;accent-color:#df78a6}
+.type-option.selected{background:var(--pinkpale);border-color:#f1a8c6;color:#9d416d}
+.type-option.em.selected{background:#fff1f3;border-color:#f1a5b2;color:#b34d64}
+.btn{border:0;border-radius:10px;padding:11px 14px;font-size:10px;font-weight:800;transition:.18s}
+.btn:hover{transform:translateY(-1px);filter:brightness(.98)}
+.btn-primary{width:100%;color:var(--navy);background:linear-gradient(100deg,#f8a4c7,#f38bb9);box-shadow:0 7px 15px #f38bb933}
+.btn-dark{background:var(--navy);color:#fff}
+.btn-soft{background:#fff0f6;color:#a34872}
+.btn-outline{background:#fff;color:#69738e;border:1px solid var(--line)}
+.queue-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.queue-box{border:1px solid #e9eaf1;background:#fcfcfe;border-radius:13px;padding:12px;min-height:132px}
+.queue-box.emergency{border-color:#f5d4df;background:#fff9fb}
+.queue-head{display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:800;color:var(--navy);margin-bottom:11px}
+.count{font-size:9px;background:#edf0f7;color:#65708b;padding:4px 7px;border-radius:20px}
+.emergency .count{background:#ffe4ed;color:#b54b74}
+.token-list{display:grid;gap:6px;max-height:175px;overflow:auto}
+.token{display:flex;align-items:center;justify-content:space-between;gap:5px;background:#fff;border:1px solid #f0f0f5;border-radius:8px;padding:7px 8px;font-size:9px}
+.token b{color:var(--navy)}.token small{color:#9299aa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:85px}
+.empty{font-size:9px;color:#a2a8b8;padding:8px 2px}
+.serving-panel{background:linear-gradient(110deg,#fff0f6,#fff8fb);border:1px solid #f6d8e5;border-radius:14px;padding:15px;display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.serving-label{font-size:8px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;color:#a44b75}
+.serving-token{font:800 29px Manrope,sans-serif;color:var(--navy);margin:4px 0}
+.serving-name{font-size:9px;color:#8e7890}
+.serving-icon{width:42px;height:42px;border-radius:14px;background:#fff;color:#bd5d88;display:grid;place-items:center;font-size:19px;box-shadow:0 5px 12px #a64b7220}
+.action-row{display:flex;gap:8px;flex-wrap:wrap}
+.action-row .btn{flex:1;min-width:120px}
+.counter-hint{font-size:9px;color:#9ca3b4;margin-top:11px;line-height:1.5}
+.table-toolbar{display:flex;align-items:center;gap:8px}
+.search{max-width:155px;padding:8px 10px;font-size:9px}
+.table-wrap{overflow:auto}
+table{border-collapse:collapse;width:100%;min-width:380px;font-size:9px}
+th{text-align:left;color:#a0a6b5;font-size:8px;letter-spacing:.7px;padding:10px 8px;border-bottom:1px solid var(--line);font-weight:800}
+td{padding:11px 8px;border-bottom:1px solid #f1f2f6;color:#68718a}
+td strong{color:var(--navy);font-size:9px}
+.pill{display:inline-block;border-radius:20px;padding:4px 7px;font-size:8px;font-weight:800}
+.pill.normal{background:#edf1ff;color:#5669a8}.pill.emergency{background:#ffe8ef;color:#b64d73}
+.pill.waiting{background:#fff5df;color:#a77b27}.pill.serving{background:#e8f1ff;color:#4b6baf}.pill.served{background:#e6f7f0;color:#208866}
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.report-box{padding:12px;border-radius:11px;background:#f8f9fc}
+.report-box small{display:block;color:#939bad;font-size:8px;margin-bottom:7px}
+.report-box strong{font:800 16px Manrope,sans-serif;color:var(--navy)}
+.report-note{font-size:8px;color:#a1a7b6;margin-top:11px;line-height:1.5}
+.toast{position:fixed;right:22px;bottom:22px;background:#101b3c;color:#fff;padding:12px 16px;border-radius:11px;font-size:10px;box-shadow:var(--shadow);opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none;z-index:5}
+.toast.show{opacity:1;transform:translateY(0)}
+footer{text-align:center;color:#a4aabb;font-size:8px;padding:9px}
+@media(max-width:1050px){.app{grid-template-columns:215px 1fr}.content-grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}main{padding:25px 22px}}
+@media(max-width:700px){.app{grid-template-columns:1fr}.sidebar{display:none}main{padding:20px 14px}.topbar{align-items:flex-start;flex-direction:column}.hero{align-items:flex-start;flex-direction:column}.hero-status{width:100%}.stats{gap:9px}.stat{padding:13px}.stat-value{font-size:22px}}
+@media(max-width:420px){.queue-grid{grid-template-columns:1fr}.report-grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:1fr 1fr}h1{font-size:22px}}
+
+/* DARK NAVY + PINK THEME — removes the white surfaces */
+:root{
+  --bg:#0b1430; --white:#17264b; --text:#e9edf8; --muted:#a7b2cf;
+  --line:#2b3a63; --shadow:0 16px 40px rgba(0,0,0,.22);
+}
+body{background:#0b1430;color:#e9edf8}
+main{color:#e9edf8}
+h1,.card-title,.stat-value,.queue-head,.token b,.report-box strong,
+td strong,.user-chip{color:#f4f5fb}
+.date-chip,.user-chip,.card,.stat{
+  background:#17264b;border-color:#2b3a63;color:#e4e9f7;
+  box-shadow:0 8px 24px rgba(0,0,0,.16)
+}
+.card-sub,.stat-foot,.counter-hint,.report-note,.side-footer{color:#9eabc9}
+.stat-head{color:#b4bfd9}
+.stat-icon{background:#26365f}
+.ic-pink{background:#4a2948;color:#ffadd0}
+.ic-blue{background:#263968;color:#aebfff}
+.ic-green{background:#1d4b49;color:#8ce2c2}
+.ic-gold{background:#4c3c2c;color:#ffd18b}
+.form-row label.field-label{color:#c1cbe1}
+input,select{
+  background:#101d3e;color:#f3f5fb;border-color:#35446d
+}
+input::placeholder{color:#7f8bab}
+input:focus,select:focus{border-color:#f38bb9;box-shadow:0 0 0 3px #f38bb91c}
+.type-option{background:#111f42;border-color:#35446d;color:#c0c9df}
+.type-option.selected{background:#4b2945;border-color:#e88ab5;color:#ffd5e6}
+.type-option.em.selected{background:#492a42;border-color:#e88ab5;color:#ffd5e6}
+.queue-box{background:#111f42;border-color:#35446d}
+.queue-box.emergency{background:#38233f;border-color:#79405f}
+.count{background:#2a395f;color:#d0d8eb}
+.emergency .count{background:#69324f;color:#ffd7e7}
+.token{background:#1b2b52;border-color:#34446d}
+.token small{color:#b1bdd8}
+.empty{color:#9eabc9}
+.serving-panel{background:linear-gradient(110deg,#3c2544,#282b56);border-color:#68415f}
+.serving-label{color:#ffb9d5}
+.serving-token{color:#fff}
+.serving-name{color:#c4b6cf}
+.serving-icon{background:#50304f;color:#ffc1dc;box-shadow:none}
+.btn-outline{background:#1e2e55;color:#dce4f5;border-color:#3a4a73}
+.btn-soft{background:#4a2948;color:#ffd3e5}
+th{color:#9eabc9;border-bottom-color:#35446d}
+td{color:#c0cbe0;border-bottom-color:#2b3a63}
+.report-box{background:#111f42}
+.report-box small{color:#aab6d1}
+.pill.normal{background:#293b69;color:#c4d0ff}
+.pill.emergency{background:#65334e;color:#ffd6e6}
+.pill.waiting{background:#554326;color:#ffdc9c}
+.pill.serving{background:#293e69;color:#c9d8ff}
+.pill.served{background:#1f4c46;color:#a4f0d4}
+.search{background:#101d3e;color:#f3f5fb;border-color:#35446d}
+footer{color:#8290b2}
+
+
+/* MULTI-ACCENT PALETTE: navy base with pink, teal, lavender and amber */
+:root{
+  --navy:#101b3c;
+  --pink:#f38bb9;
+  --teal:#55d6c2;
+  --lavender:#b7a5ff;
+  --amber:#ffc66d;
+  --coral:#ff8f83;
+}
+.hero{background:linear-gradient(112deg,#101b3c 0%,#1b2d5c 55%,#31516d 100%)}
+.hero-kicker{color:#ffb4d2}
+.hero-status i{background:var(--teal);box-shadow:0 0 0 4px #55d6c222}
+.logo{background:linear-gradient(135deg,#ffc2dc,#f38bb9)}
+.stat:nth-child(1) .stat-icon{background:#4a2948;color:#ffadd0}
+.stat:nth-child(2) .stat-icon{background:#173f50;color:#70e4d3}
+.stat:nth-child(3) .stat-icon{background:#40365f;color:#c7baff}
+.stat:nth-child(4) .stat-icon{background:#554326;color:#ffd18b}
+.stat:nth-child(2) .stat-value{color:#75dfd0}
+.stat:nth-child(3) .stat-value{color:#c1b3ff}
+.stat:nth-child(4) .stat-value{color:#ffd18b}
+.card-symbol{background:#26365f;color:#ffafd0}
+#registration .card-symbol{background:#4a2948;color:#ffafd0}
+.queue-box.emergency{background:#38233f;border-color:#79405f}
+.queue-box:not(.emergency){background:#102b43;border-color:#28516a}
+.queue-box:not(.emergency) .count{background:#1b5360;color:#91eee1}
+.emergency .count{background:#69324f;color:#ffd7e7}
+.serving-panel{background:linear-gradient(110deg,#3c2544,#282b56 65%,#1c4552);border-color:#68415f}
+.serving-icon{background:#1b5360;color:#8ceadd}
+.btn-primary{background:linear-gradient(100deg,#f8a4c7,#f38bb9);color:#101b3c}
+.btn-dark{background:linear-gradient(100deg,#243d70,#31567c);color:#fff}
+.btn-outline:hover{border-color:#55d6c2;color:#8ceadd}
+.pill.normal{background:#203b61;color:#b8d8ff}
+.pill.emergency{background:#65334e;color:#ffd6e6}
+.pill.waiting{background:#554326;color:#ffdc9c}
+.pill.serving{background:#1b5360;color:#9af0e3}
+.pill.served{background:#1f4c46;color:#a4f0d4}
+.report-box:nth-child(1){background:#38233f}
+.report-box:nth-child(1) strong{color:#ffafd0}
+.report-box:nth-child(2){background:#102f45}
+.report-box:nth-child(2) strong{color:#7ce5d7}
+.report-box:nth-child(3){background:#302b50}
+.report-box:nth-child(3) strong{color:#c4b8ff}
+.priority-card{border-color:#55d6c244;background:linear-gradient(145deg,#ffffff0b,#55d6c20b)}
+.priority-top{color:#9ceadd}
+.token b{color:#f5f3ff}
+
+
+
+/* FRESH PALETTE: charcoal + plum + peach + mint + lilac (less blue) */
+:root{
+  --navy:#302235; --navy2:#493047; --navy3:#62405d;
+  --pink:#ff9fbd; --pink2:#ffd5e2; --pinkpale:#402b3b;
+  --bg:#17151d; --white:#24212c; --text:#f5edf3; --muted:#c0b3c0;
+  --line:#403744; --green:#62d6b2; --amber:#ffc477; --red:#ff8297;
+  --shadow:0 16px 40px rgba(0,0,0,.28);
+}
+body{background:radial-gradient(ellipse at 80% 0%,#38243a 0%,#1c1923 42%,#17151d 78%);color:#f5edf3}
+.sidebar{background:linear-gradient(165deg,#251b2b 0%,#302137 55%,#3b2938 100%);border-right:1px solid #4a3948}
+.logo{background:linear-gradient(135deg,#ffd18d,#ff9fbd);color:#352237;box-shadow:0 7px 22px #ff9fbd33}
+.brand-sub,.nav-label{color:#c0aabd}
+.nav-item{color:#d2c2d2}
+.nav-item.active{background:linear-gradient(90deg,#ff9fbd30,#ffc47712);box-shadow:inset 3px 0 #ff9fbd}
+.nav-item:not(.active):hover{background:#ffffff10}
+.priority-card{border-color:#62d6b255;background:linear-gradient(145deg,#ffffff0b,#62d6b211)}
+.priority-top{color:#8be8cc}
+.side-footer{color:#a38ca4}
+main{color:#f5edf3}
+h1,.card-title,.stat-value,.queue-head,.token b,.report-box strong,td strong,.user-chip{color:#fff3f7}
+.crumb{color:#e99bb7}
+.date-chip,.user-chip,.card,.stat{background:#24212c;border-color:#403744;color:#f1e7ef;box-shadow:0 8px 24px #00000026}
+.avatar{background:#493047;color:#ffc0d4}
+.hero{background:linear-gradient(112deg,#57334f 0%,#75435d 52%,#98604f 100%);box-shadow:0 14px 32px #00000030}
+.hero-kicker{color:#ffcf9b}.hero p{color:#f2dce8}.hero-status{background:#21192355;border-color:#ffffff2b}.hero-status small{color:#f0d5e3}.hero-status i{background:#7ce3bd;box-shadow:0 0 0 4px #7ce3bd25}
+.stat-head{color:#c8b9c8}.stat-foot,.card-sub,.counter-hint,.report-note{color:#b3a4b5}
+.stat-icon{background:#3b3040}
+.ic-pink{background:#503044;color:#ffabc7}.ic-blue{background:#29483f;color:#83e6c8}.ic-green{background:#254b43;color:#8ce8c8}.ic-gold{background:#51402f;color:#ffd18e}
+.stat:nth-child(1) .stat-icon{background:#503044;color:#ffabc7}
+.stat:nth-child(2) .stat-icon{background:#254b43;color:#83e6c8}
+.stat:nth-child(3) .stat-icon{background:#40334f;color:#c9b6ff}
+.stat:nth-child(4) .stat-icon{background:#51402f;color:#ffd18e}
+.stat:nth-child(1) .stat-value{color:#ffabc7}.stat:nth-child(2) .stat-value{color:#83e6c8}.stat:nth-child(3) .stat-value{color:#c9b6ff}.stat:nth-child(4) .stat-value{color:#ffd18e}
+.form-row label.field-label{color:#d5c7d5}
+input,select,.search{background:#191820;color:#fff1f7;border-color:#514451}
+input::placeholder{color:#98899a}
+input:focus,select:focus{border-color:#ff9fbd;box-shadow:0 0 0 3px #ff9fbd20}
+.type-option{background:#29232e;border-color:#514451;color:#d9cbd9}
+.type-option.selected{background:#503044;border-color:#ff9fbd;color:#ffd5e2}
+.type-option.em.selected{background:#56313d;border-color:#ff8297;color:#ffd5df}
+.type-option input{accent-color:#ff9fbd}
+.btn-primary{background:linear-gradient(100deg,#ffc477,#ff9fbd);color:#352237;box-shadow:0 7px 18px #ff9fbd30}
+.btn-dark{background:linear-gradient(100deg,#4c354b,#76506c);color:#fff}
+.btn-soft{background:#503044;color:#ffd5e2}
+.btn-outline{background:#302a36;color:#e8dce8;border-color:#514451}
+.btn-outline:hover{border-color:#62d6b2;color:#8be8cc}
+.queue-box{background:#211e28;border-color:#4a3e4b}
+.queue-box:not(.emergency){background:#20352f;border-color:#376253}
+.queue-box.emergency{background:#402733;border-color:#754454}
+.queue-head{color:#fff0f5}
+.count{background:#3a3341;color:#e1d3e1}.queue-box:not(.emergency) .count{background:#315b4d;color:#a8f0d6}.emergency .count{background:#704052;color:#ffd6e2}
+.token{background:#2d2732;border-color:#4b404c}.token small{color:#c0b1c1}.empty{color:#b3a4b5}
+.serving-panel{background:linear-gradient(110deg,#503044,#473149 55%,#285044);border-color:#76506c}
+.serving-label{color:#ffc1d5}.serving-token{color:#fff4f8}.serving-name{color:#ddc9d9}.serving-icon{background:#315b4d;color:#9bf0d4;box-shadow:none}
+th{color:#b7a8b9;border-bottom-color:#4a3e4b}td{color:#d3c5d4;border-bottom-color:#403744}
+.report-box{background:#302936}.report-box:nth-child(1){background:#503044}.report-box:nth-child(1) strong{color:#ffb5cd}.report-box:nth-child(2){background:#24463e}.report-box:nth-child(2) strong{color:#8be8cc}.report-box:nth-child(3){background:#40334f}.report-box:nth-child(3) strong{color:#c9b6ff}.report-box small{color:#c1b2c2}
+.pill.normal{background:#40334f;color:#d1c4ff}.pill.emergency{background:#704052;color:#ffd6e2}.pill.waiting{background:#59452f;color:#ffdfa9}.pill.serving{background:#315b4d;color:#a8f0d6}.pill.served{background:#285044;color:#a9f0d5}
+.toast{background:#302235;color:#fff4f8;border:1px solid #62405d}
+footer{color:#a998aa}
+
+
+/* QUEUEEASE — a calm, credible palette for healthcare + banking */
+:root{
+ --bg:#eeeae1; --text:#263832; --muted:#87918a; --line:#dedbd1;
+ --navy:#193a35; --navy2:#245148; --navy3:#32685c;
+ --pink:#e9a08d; --pink2:#f4c5b7; --pinkpale:#f9eee9;
+ --green:#31977c; --amber:#d8a64d; --red:#d66e62;
+ --shadow:0 14px 35px rgba(38,56,50,.09);
+}
+body{background:radial-gradient(ellipse at 88% 0%,#e5d8c8 0%,#f0ede5 42%,#e9e7df 100%);color:var(--text)}
+.sidebar{background:linear-gradient(160deg,#173832 0%,#20483f 58%,#2d5b50 100%);border-right:1px solid #38685c}
+.logo{background:linear-gradient(135deg,#f3c58e,#e9a08d);color:#193a35;box-shadow:0 8px 22px #e9a08d40}
+.brand-sub,.nav-label{color:#a9c4b9}.nav-item{color:#d0e0d8}
+.nav-item.active{background:linear-gradient(90deg,#e9a08d32,#e9a08d0c);box-shadow:inset 3px 0 #f1b69f;color:#fff}
+.nav-item:not(.active):hover{background:#ffffff12}
+.priority-card{border-color:#74c6a455;background:linear-gradient(145deg,#ffffff0c,#65c6a20c)}
+.priority-top{color:#a4e2c8}.live-dot{background:#7be0b5;box-shadow:0 0 0 4px #7be0b522}
+.side-footer{color:#9bb7aa}
+main{color:var(--text)}h1,.card-title,.stat-value,.queue-head,.token b,.report-box strong,td strong,.user-chip{color:#203b35}
+.crumb{color:#a66d58}
+.date-chip,.user-chip,.card,.stat{background:#f8f6f0;border-color:#dedbd1;color:#31453e;box-shadow:0 9px 25px #334c3d0c}
+.avatar{background:#f6e4d9;color:#9b604d}
+.hero{background:linear-gradient(112deg,#21483f 0%,#32685b 58%,#9b7660 100%);box-shadow:0 15px 32px #25483b24}
+.hero-kicker{color:#f4c89d}.hero p{color:#e0ece4}.hero-status{background:#142f2a55;border-color:#ffffff2b}.hero-status small{color:#d1e1d8}
+.hero-status i{background:#8fe0ba;box-shadow:0 0 0 4px #8fe0ba28}
+.stat-head{color:#78877f}.stat-foot,.card-sub,.counter-hint,.report-note{color:#89958d}
+.stat-icon{background:#e8eee8}.stat:nth-child(1) .stat-icon{background:#f7e7df;color:#b96d57}
+.stat:nth-child(2) .stat-icon{background:#dff0e9;color:#328a70}.stat:nth-child(3) .stat-icon{background:#f8e9d4;color:#b78335}.stat:nth-child(4) .stat-icon{background:#e9e4f1;color:#806caa}
+.stat:nth-child(1) .stat-value{color:#bd765f}.stat:nth-child(2) .stat-value{color:#328a70}.stat:nth-child(3) .stat-value{color:#bd8a3e}.stat:nth-child(4) .stat-value{color:#8876ad}
+.form-row label.field-label{color:#65766d}
+input,select,.search{background:#f2f0e9;color:#263832;border-color:#d9d8ce}
+input::placeholder{color:#a4aaa2}input:focus,select:focus{border-color:#6eb79d;box-shadow:0 0 0 3px #6eb79d25}
+.type-option{background:#f3f1eb;border-color:#dedbd1;color:#6f7c74}
+.type-option.selected{background:#e0f0e8;border-color:#7ebba0;color:#286d58}
+.type-option.em.selected{background:#f9e6df;border-color:#e3a08e;color:#a95348}
+.type-option input{accent-color:#328a70}
+.btn-primary{background:linear-gradient(100deg,#e9b18e,#e9a08d);color:#3e342e;box-shadow:0 7px 17px #d58e7540}
+.btn-primary:hover{filter:brightness(1.04);box-shadow:0 10px 22px #d58e754a}
+.btn-dark{background:linear-gradient(100deg,#245448,#347966);color:#fff}
+.btn-soft{background:#f7e8e1;color:#a65e4c}.btn-outline{background:#f5f3ed;color:#52675d;border-color:#d9dcd3}
+.btn-outline:hover{border-color:#65aa91;color:#2e8067}
+.queue-box{background:#f0f3ec;border-color:#d9e2d8}.queue-box:not(.emergency){background:#e7f1e9;border-color:#c9ddcf}
+.queue-box.emergency{background:#f8e9e2;border-color:#edc9bd}
+.queue-head{color:#29463c}.count{background:#e0e8df;color:#5e7165}
+.queue-box:not(.emergency) .count{background:#cfe6d8;color:#28775d}.emergency .count{background:#f2d3c8;color:#a8564a}
+.token{background:#fbfaf6;border-color:#e4e2d9}.token small{color:#7f8b83}.empty{color:#89958d}
+.serving-panel{background:linear-gradient(110deg,#e2efe7,#f4e6dc 75%,#f5e9df);border-color:#cbded1}
+.serving-label{color:#9b6954}.serving-token{color:#21483f}.serving-name{color:#718078}
+.serving-icon{background:#d5e9dc;color:#317c64;box-shadow:none}
+th{color:#87938b;border-bottom-color:#dedfd7}td{color:#65746b;border-bottom-color:#e6e5dd}
+.report-box{background:#eeeee7}.report-box:nth-child(1){background:#f5e5de}.report-box:nth-child(1) strong{color:#b66e59}
+.report-box:nth-child(2){background:#e0eee5}.report-box:nth-child(2) strong{color:#328269}
+.report-box:nth-child(3){background:#eee8f3}.report-box:nth-child(3) strong{color:#806ca4}.report-box small{color:#818d84}
+.pill.normal{background:#e1eee5;color:#31795f}.pill.emergency{background:#f7e2dc;color:#ad584d}
+.pill.waiting{background:#f8efd9;color:#a17a31}.pill.serving{background:#dceee7;color:#2d8068}.pill.served{background:#dcefe4;color:#2d8068}
+.toast{background:#1d4038;color:#fff;border:1px solid #467365}
+footer{color:#849087}
+/* Small interaction details that make the dashboard feel polished */
+.card,.stat,.queue-box,.btn,.nav-item{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.card:hover,.stat:hover{box-shadow:0 16px 34px rgba(38,56,50,.12)}
+.stat{position:relative;overflow:hidden}.stat:after{content:"";position:absolute;right:-22px;bottom:-34px;width:92px;height:92px;border-radius:50%;background:currentColor;opacity:.035}
+.card{backdrop-filter:blur(6px)}
+.hero{min-height:145px}.hero h2{font-size:23px}
+.btn{letter-spacing:.1px}.btn-primary:active,.btn-dark:active{transform:translateY(1px)}
+@media(max-width:700px){.hero h2{font-size:20px}}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="logo">✚</div><div><div class="brand-name">QueueEase</div><div class="brand-sub">SMART TOKEN SYSTEM</div></div></div>
+    <div class="nav-label">MAIN MENU</div>
+    <nav class="nav">
+  <div class="nav-item active" data-target="dashboard">
+    <span class="ico">▦</span>Dashboard
+  </div>
+  <div class="nav-item" data-target="registration">
+    <span class="ico">＋</span>Visitor Registration
+  </div>
+  <div class="nav-item" data-target="queue">
+    <span class="ico">☷</span>Queue Management
+  </div>
+  <div class="nav-item" data-target="reports">
+    <span class="ico">◷</span>Waiting Time Reports
+  </div>
+</nav>
+    <div class="side-bottom">
+      <div class="priority-card"><div class="priority-top"><i class="live-dot"></i> Priority rules active</div><p>Priority requests are served first. Standard requests follow FIFO (First In, First Out).</p></div>
+      <div class="side-footer">QUEUEEASE • PROJECT DEMO</div>
+    </div>
+  </aside>
+
+  <main>
+    <header class="topbar">
+      <div><div class="crumb">Hospital & Bank services / Overview</div><h1>Token Management Dashboard</h1></div>
+      <div class="top-right"><div class="date-chip" id="today">Today</div><div class="user-chip"><span class="avatar">CQ</span> Reception Desk</div></div>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy"><div class="hero-kicker">A smarter way to wait</div><h2>One queue. Smoother service. ✨</h2><p>Register visitors, manage priority queues and keep every service counter moving smoothly.</p></div>
+      <div class="hero-status"><small>SYSTEM STATUS</small><strong><i></i> All systems operational</strong></div>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><div class="stat-head">Total registered <span class="stat-icon ic-pink">♙</span></div><div class="stat-value" id="totalStat">0</div><div class="stat-foot">Visitors registered today</div></div>
+      <div class="stat"><div class="stat-head">Currently waiting <span class="stat-icon ic-blue">◷</span></div><div class="stat-value" id="waitingStat">0</div><div class="stat-foot">Across both queues</div></div>
+      <div class="stat"><div class="stat-head">Priority cases <span class="stat-icon ic-gold">♥</span></div><div class="stat-value" id="emergencyStat">0</div><div class="stat-foot">Priority registrations</div></div>
+      <div class="stat"><div class="stat-head">Average wait <span class="stat-icon ic-green">⌛</span></div><div class="stat-value" id="avgStat">0 min</div><div class="stat-foot">For completed visitors</div></div>
+    </section>
+
+    <div class="content-grid">
+      <div>
+        <section class="card" id="registration">
+          <div class="card-head"><div><div class="card-title">Register a visitor</div><div class="card-sub">Enter details to generate a service token</div></div><div class="card-symbol">＋</div></div>
+          <form id="visitorForm">
+            <div class="form-row"><label class="field-label" for="visitorName">CUSTOMER / VISITOR NAME</label><input id="visitorName" placeholder="e.g. Aditi Sharma" maxlength="40" required></div>
+            <div class="form-row"><label class="field-label" for="visitorAge">AGE <span style="font-weight:400;color:#a3a9b7">(OPTIONAL)</span></label><input id="visitorAge" type="number" min="0" max="120" placeholder="Enter age"></div>
+            <div class="form-row"><label class="field-label">SERVICE CATEGORY</label><div class="type-options">
+              <label class="type-option selected" id="normalLabel"><input type="radio" name="type" value="normal" checked> ◉ Standard</label>
+              <label class="type-option em" id="emergencyLabel"><input type="radio" name="type" value="emergency"> ✚ Priority</label>
+            </div></div>
+            <button class="btn btn-primary" type="submit">Generate Service Token&nbsp; →</button>
+          </form>
+        </section>
+
+        <section class="card" id="queue">
+          <div class="card-head"><div><div class="card-title">Live queue overview</div><div class="card-sub">Visitors waiting for their turn</div></div><div class="card-symbol">☷</div></div>
+          <div class="queue-grid">
+            <div class="queue-box emergency"><div class="queue-head">✚ Priority <span class="count" id="emCount">0</span></div><div class="token-list" id="emQueue"><div class="empty">No priority visitors</div></div></div>
+            <div class="queue-box"><div class="queue-head">◉ Standard <span class="count" id="normalCount">0</span></div><div class="token-list" id="normalQueue"><div class="empty">No standard visitors</div></div></div>
+          </div>
+        </section>
+      </div>
+
+      <div>
+        <section class="card">
+          <div class="card-head"><div><div class="card-title">Service counter</div><div class="card-sub">Call and complete the next visitor</div></div><div class="card-symbol">▣</div></div>
+          <div class="serving-panel"><div><div class="serving-label">Now serving</div><div class="serving-token" id="currentToken">— — —</div><div class="serving-name" id="currentName">Counter is ready for the next visitor</div></div><div class="serving-icon">✚</div></div>
+          <div class="action-row"><button class="btn btn-dark" id="nextBtn">Call Next Token →</button><button class="btn btn-outline" id="resetBtn">↻ Reset demo</button></div>
+          <div class="counter-hint" id="counterHint">Priority rule: Priority queue is checked before the standard FIFO queue.</div>
+        </section>
+
+        <section class="card">
+          <div class="card-head"><div><div class="card-title">Visitor activity</div><div class="card-sub">Recent registrations and service status</div></div><input class="search" id="searchInput" placeholder="⌕ Search visitor..."></div>
+          <div class="table-wrap"><table><thead><tr><th>TOKEN ID</th><th>VISITOR</th><th>CATEGORY</th><th>STATUS</th></tr></thead><tbody id="activityBody"><tr><td colspan="4" class="empty">No activity yet. Register a visitor to begin.</td></tr></tbody></table></div>
+        </section>
+
+        <section class="card" id="reports">
+          <div class="card-head"><div><div class="card-title">Waiting time report</div><div class="card-sub">Session performance summary</div></div><div class="card-symbol">◷</div></div>
+          <div class="report-grid">
+            <div class="report-box"><small>Visitors served</small><strong id="servedStat">0</strong></div>
+            <div class="report-box"><small>Total waiting time</small><strong id="totalWait">0 min</strong></div>
+            <div class="report-box"><small>Average wait</small><strong id="reportAvg">0 min</strong></div>
+          </div>
+          <div class="report-note">Waiting time is measured from registration until the visitor is called to the service counter. This prototype uses the current browser session only.</div>
+        </section>
+      </div>
+    </div>
+    <footer>QueueEase · Hospital/Bank Token Management System · Front-end prototype for academic demonstration</footer>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const normalQueue=[], emergencyQueue=[], visitors=[];
+let normalSeq=1, emergencySeq=1, current=null, totalWait=0, served=0;
+const $=id=>document.getElementById(id);
+const timeNow=()=>Date.now();
+$('today').textContent=new Date().toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+document.querySelectorAll('input[name="type"]').forEach(r=>r.addEventListener('change',()=>{
+  $('normalLabel').classList.toggle('selected',r.value==='normal'&&r.checked);
+  $('emergencyLabel').classList.toggle('selected',r.value==='emergency'&&r.checked);
+}));
+function notify(message){$('toast').textContent=message;$('toast').classList.add('show');clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').classList.remove('show'),2400)}
+function registerVisitor(name,age,type){
+  const token=type==='emergency'?`E${String(emergencySeq++).padStart(3,'0')}`:`N${String(normalSeq++).padStart(3,'0')}`;
+  const visitor={token,name,age,type,arrival:timeNow(),status:'Waiting',start:null,wait:0};
+  visitors.unshift(visitor);
+  (type==='emergency'?emergencyQueue:normalQueue).push(visitor);
+  render();notify(`Token ${token} generated successfully`);
+}
+$('visitorForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('visitorName').value.trim();if(!name)return;
+  registerVisitor(name,$('visitorAge').value,document.querySelector('input[name="type"]:checked').value);
+  $('visitorForm').reset();$('normalLabel').classList.add('selected');$('emergencyLabel').classList.remove('selected');
+});
+function callNext(){
+  if(current){notify('Please complete the current service first.');return}
+  const visitor=emergencyQueue.length?emergencyQueue.shift():normalQueue.shift();
+  if(!visitor){notify('No visitors are waiting right now.');return}
+  visitor.status='Serving';visitor.start=timeNow();visitor.wait=Math.max(0,Math.round((visitor.start-visitor.arrival)/60000));current=visitor;
+  $('currentToken').textContent=visitor.token;
+  $('currentName').textContent=visitor.name+(visitor.type==='emergency'?' · Priority service':' · Standard service');
+  $('nextBtn').textContent='Complete Service ✓';$('counterHint').textContent='Visitor is being served. Complete service to call the next token.';
+  render();notify(`${visitor.token} has been called to the counter`);
+}
+function completeService(){
+  if(!current)return;
+  current.status='Served';current.end=timeNow();totalWait+=current.wait;served++;
+  notify(`${current.token} service completed`);
+  current=null;$('currentToken').textContent='— — —';$('currentName').textContent='Counter is ready for the next visitor';
+  $('nextBtn').textContent='Call Next Token →';$('counterHint').textContent='Priority rule: Priority queue is checked before the standard FIFO queue.';
+  render();
+}
+$('nextBtn').addEventListener('click',()=>current?completeService():callNext());
+$('resetBtn').addEventListener('click',()=>{
+  if(!confirm('Clear all visitors and reset the demo?'))return;
+  normalQueue.length=0;emergencyQueue.length=0;visitors.length=0;
+  normalSeq=1;emergencySeq=1;current=null;totalWait=0;served=0;
+  $('currentToken').textContent='— — —';$('currentName').textContent='Counter is ready for the next visitor';
+  $('nextBtn').textContent='Call Next Token →';$('counterHint').textContent='Priority rule: Priority queue is checked before the standard FIFO queue.';
+  render();notify('Demo reset successfully');
+});
+$('searchInput').addEventListener('input',render);
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function drawQueue(id,queue,emptyText){
+  $(id).innerHTML=queue.length?queue.map(p=>`<div class="token"><b>${p.token}</b><small>${escapeHtml(p.name)}</small></div>`).join(''):`<div class="empty">${emptyText}</div>`;
+}
+function render(){
+  $('totalStat').textContent=visitors.length;
+  $('waitingStat').textContent=normalQueue.length+emergencyQueue.length+(current?1:0);
+  $('emergencyStat').textContent=visitors.filter(p=>p.type==='emergency').length;
+  $('avgStat').textContent=(served?Math.round(totalWait/served):0)+' min';
+  $('emCount').textContent=emergencyQueue.length;$('normalCount').textContent=normalQueue.length;
+  $('servedStat').textContent=served;$('totalWait').textContent=totalWait+' min';
+  $('reportAvg').textContent=(served?Math.round(totalWait/served):0)+' min';
+  drawQueue('emQueue',emergencyQueue,'No priority visitors');drawQueue('normalQueue',normalQueue,'No standard visitors');
+  const query=$('searchInput').value.trim().toLowerCase();
+  const filtered=visitors.filter(p=>p.name.toLowerCase().includes(query)||p.token.toLowerCase().includes(query)).slice(0,10);
+  $('activityBody').innerHTML=filtered.length?filtered.map(p=>`<tr><td><strong>${p.token}</strong></td><td>${escapeHtml(p.name)}</td><td><span class="pill ${p.type}">${p.type==='emergency'?'Priority':'Standard'}</span></td><td><span class="pill ${p.status.toLowerCase()}">${p.status}</span></td></tr>`).join(''):'<tr><td colspan="4" class="empty">No matching visitor records.</td></tr>';
+}
+render();
+// SIDEBAR NAVIGATION
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const target = item.dataset.target;
+
+    const sections = {
+      dashboard: document.querySelector('.topbar'),
+      registration: document.getElementById('registration'),
+      queue: document.getElementById('queue'),
+      reports: document.getElementById('reports')
+    };
+
+    const section = sections[target];
+
+    if (section) {
+      section.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+
+    document.querySelectorAll('.nav-item').forEach(nav => {
+      nav.classList.remove('active');
+    });
+
+    item.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
